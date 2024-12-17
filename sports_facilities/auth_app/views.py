@@ -25,7 +25,7 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 class UserListAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = [UserSerializer]
+    serializer_class = UserSerializer
 
     def get(self, request):
         users = CustomUser.objects.all()

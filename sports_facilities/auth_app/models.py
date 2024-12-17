@@ -5,13 +5,13 @@ class CustomUser(AbstractUser):
     ROLE_CHOICES = [
         ('owner', 'Owner'),
         ('admin', 'Admin'),
-        ('manager', 'Manager'),
+        ('member', 'member'),
     ]
 
     role = models.CharField(
         max_length=10,
         choices=ROLE_CHOICES,
-        default='manager',
+        default='member',
     )
 
     # Optional: add any additional fields specific to your app, e.g. profile, contact information, etc.
@@ -19,3 +19,4 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+

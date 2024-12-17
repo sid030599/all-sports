@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import FacilityListAPIView, FacilityDetailAPIView
+from .views import GymListCreateView, GymDetailView
 
 urlpatterns = [
-    path('facilities/', FacilityListAPIView.as_view(), name='facility-list'),
-    path('facilities/<int:pk>/', FacilityDetailAPIView.as_view(), name='facility-detail'),
+    path('gyms/', GymListCreateView.as_view(), name='gym-list-create'),
+    path('gyms/<int:pk>/', GymDetailView.as_view(), name='gym-detail')
 ]
