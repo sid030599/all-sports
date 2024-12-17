@@ -1,0 +1,10 @@
+Django>=4.2
+psycopg2-binary
+djangorestframework
+django-cors-headers
+django-environ
+django-rest-framework
+djangorestframework
+djangorestframework-simplejwt
+djangorestframework
+drf-spectacular

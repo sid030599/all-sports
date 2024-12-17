@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:15  # Use the official PostgreSQL 15 image
+    container_name: postgresql-db
+    platform: linux/arm64
+    environment:
+      POSTGRES_USER: sid
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: sports_facilities
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: ./sports_facilities
+      dockerfile: Dockerfile
+    container_name: sports_facilities_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./sports_facilities:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
