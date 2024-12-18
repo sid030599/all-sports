@@ -8,3 +8,4 @@ djangorestframework
 djangorestframework-simplejwt
 djangorestframework
 drf-spectacular
+Pillow

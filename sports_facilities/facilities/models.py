@@ -7,6 +7,8 @@ class Gym(models.Model):
     name = models.CharField(max_length=255)
     address = models.TextField()
     location = models.CharField(max_length=255)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     contact_number = models.CharField(max_length=20, blank=True, null=True)
     price_range = models.CharField(max_length=50, blank=True, null=True)
     equipment = models.JSONField(blank=True, null=True)
@@ -16,7 +18,8 @@ class Gym(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+
 class Member(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='membership')
     gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='members')
@@ -28,3 +31,10 @@ class Member(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.gym.name}"
 
+class GymPhoto(models.Model):
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name='photos')
+    photo = models.ImageField(upload_to='gym_photos/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Photo of {self.gym.name}"

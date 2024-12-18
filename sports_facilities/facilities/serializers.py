@@ -1,13 +1,16 @@
 from rest_framework import serializers
-from .models import Gym, Member
+from .models import Gym, Member, GymPhoto
 
-# Gym Serializer
+class GymPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GymPhoto
+        fields = ['id', 'photo', 'uploaded_at']
+        
 class GymSerializer(serializers.ModelSerializer):
-    
+    photos = GymPhotoSerializer(many=True, read_only=True)
     class Meta:
         model = Gym
-        fields = ['id', 'owner', 'name', 'address', 'location', 'contact_number', 'price_range', 'equipment', 'trainers', 'subscription_pricing', 'created_at']
-
+        fields = ['id', 'name', 'address', 'latitude', 'longitude', 'location', 'contact_number', 'price_range', 'equipment', 'trainers', 'subscription_pricing', 'photos']
 
 # Member Serializer
 class MemberSerializer(serializers.ModelSerializer):
@@ -17,3 +20,5 @@ class MemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
         fields = ['id', 'user', 'gym', 'membership_start_date', 'membership_end_date', 'membership_type', 'contact_number']
+
+
