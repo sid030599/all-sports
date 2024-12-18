@@ -1,0 +1,70 @@
+# Byte-compiled files
+*.pyc
+*.pyo
+__pycache__/
+
+# Django migrations
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# Environment variables and secrets
+.env
+*.env
+
+# Database files
+*.sqlite3
+
+# Media files
+/media/
+!media/readme.md  # Keep this file if you want to maintain the folder structure
+
+# Static files
+/static/
+!static/readme.md  # Keep this file if you want to maintain the folder structure
+
+# Virtual environments
+venv/
+env/
+
+# IDE and editor-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+
+# Logs
+*.log
+
+# pytest and coverage
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Compiled files
+*.egg-info/
+*.egg
+
+# Deployment and build files
+build/
+dist/
+
+# Node modules (if using npm/yarn for frontend)
+node_modules/
+
+# Temporary files
+*.bak
+*.tmp
+*.log
+
+# Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
