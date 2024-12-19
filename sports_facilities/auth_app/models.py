@@ -6,6 +6,7 @@ class CustomUser(AbstractUser):
         ('owner', 'Owner'),
         ('admin', 'Admin'),
         ('member', 'member'),
+        ('trainer', 'trainer')
     ]
 
     role = models.CharField(
@@ -19,4 +20,3 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
-

@@ -1,15 +1,19 @@
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from .models import Gym, GymPhoto
-from .serializers import GymSerializer, GymPhotoSerializer
+from django.db.models.expressions import RawSQL
 from django.shortcuts import get_object_or_404
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from facilities.models import Gym, GymPhoto
+from facilities.serializers import GymSerializer, GymPhotoSerializer, GymDetailSerializer
 
 
-# Gym List & Create View (for authenticated users)
 class GymListCreateView(APIView):
+    """
+    Gym create view
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = GymSerializer
     
@@ -19,10 +23,9 @@ class GymListCreateView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        # Automatically associate the gym with the logged-in owner (user)
         request.data["owner"] = (
             request.user.id
-        )  # Set the owner field to the logged-in user
+        )
         serializer = GymSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -30,19 +33,21 @@ class GymListCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Gym Detail View (for authenticated owners and admins)
 class GymDetailView(APIView):
+    """
+    Gym Detail View
+    """
     permission_classes = [IsAuthenticated]
-    serializer_class = GymSerializer
+    serializer_class = GymDetailSerializer
 
     def get(self, request, pk):
         gym = get_object_or_404(Gym, pk=pk)
-        serializer = GymSerializer(gym)
+        serializer = self.serializer_class(gym)
         return Response(serializer.data)
 
     def put(self, request, pk):
         gym = get_object_or_404(Gym, pk=pk)
-        serializer = GymSerializer(gym, data=request.data, partial=True)
+        serializer = self.serializer_class(gym, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -55,7 +60,7 @@ class GymDetailView(APIView):
 
 
 class GymPhotoUploadView(APIView):
-    parser_classes = [MultiPartParser, FormParser]  # To handle file uploads
+    parser_classes = [MultiPartParser, FormParser]
     serializer_class = GymPhotoSerializer
     
     def post(self, request, gym_id):
@@ -76,10 +81,6 @@ class GymPhotoUploadView(APIView):
         serializer = GymPhotoSerializer(gym_photo)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
-from django.db import connection
-from django.db.models.expressions import RawSQL
-from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 class GymsWithinRadiusView(APIView):
     permission_classes = [IsAuthenticated]
