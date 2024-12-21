@@ -1,3 +1,4 @@
+version: '3'
 services:
   db:
     image: postgres:15  # Use the official PostgreSQL 15 image
@@ -25,5 +26,21 @@ services:
     depends_on:
       - db
 
+  frontend:
+    build:
+      context: ./gym-management  # Path to your React project
+      dockerfile: Dockerfile
+    container_name: react_frontend
+    ports:
+      - "3000:80"  # Expose port 3000 on the host, port 80 inside the container
+    depends_on:
+      - web  # Wait for the backend (Django) to be ready
+    networks:
+      - frontend-backend
+
 volumes:
   pgdata:
+
+networks:
+  frontend-backend:
+    driver: bridge
