@@ -30,7 +30,7 @@ class Gym(models.Model):
         ratings = self.ratings_reviews.aggregate(
             avg=models.Avg("rating"), count=models.Count("rating")
         )
-        self.average_rating = ratings["avg"] or 0.0
+        self.average_rating = round(ratings["avg"],2) or 0.0
         self.review_count = ratings["count"] or 0
         self.save()
 
@@ -114,7 +114,9 @@ class GymRatingReview(models.Model):
         related_name="ratings_reviews",
         limit_choices_to={"role": "member"},
     )
-    rating = models.PositiveSmallIntegerField()
+    rating = models.PositiveSmallIntegerField(
+        choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)]
+    )
     review = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -124,3 +126,7 @@ class GymRatingReview(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.gym.name} ({self.rating} stars)"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Save the review first
+        self.gym.update_rating() 
