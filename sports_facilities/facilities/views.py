@@ -39,7 +39,10 @@ class GymListCreateView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = GymDetailSerializer(data=request.data)
+        request.data["owner"] = (
+            request.user.id
+        )
+        serializer = GymSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

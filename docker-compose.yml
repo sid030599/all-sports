@@ -1,17 +1,5 @@
+version: '3'
 services:
-  db:
-    image: postgres:15  # Use the official PostgreSQL 15 image
-    container_name: postgresql-db
-    platform: linux/arm64
-    environment:
-      POSTGRES_USER: sid
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: sports_facilities
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
   web:
     build:
       context: ./sports_facilities
@@ -22,8 +10,14 @@ services:
       - ./sports_facilities:/app
     ports:
       - "8000:8000"
-    depends_on:
-      - db
+    # depends_on:
+    #   - db  # Backend only depends on the database
+    environment:
+      DATABASE_NAME: all-sports
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: Sid030599
+      DATABASE_HOST: all-sports.c5wcoy68gtxh.eu-north-1.rds.amazonaws.com
+      DATABASE_PORT: "5432"
 
 volumes:
   pgdata:
