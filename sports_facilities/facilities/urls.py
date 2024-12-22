@@ -7,6 +7,8 @@ from .views import (
     GymRatingReviewView,
     GymSubscriptionPlanView,
     GymFeatureView,
+    GymMemberView,
+    GymTrainerView
 )
 
 urlpatterns = [
@@ -19,12 +21,14 @@ urlpatterns = [
     path(
         "gyms/subscription-plans/",
         GymSubscriptionPlanView.as_view(),
-        name="gym_subscription_plans",
+        name="gym-subscription-plans",
     ),
     path(
         "gyms/reviews/",
         GymRatingReviewView.as_view(),
-        name="gym_reviews",
+        name="gym-reviews",
     ),
-    path("features/", GymFeatureView.as_view(), name="gym_features"),
+    path("gym/features/", GymFeatureView.as_view(), name="gym-features"),
+    path("gym/members/", GymMemberView.as_view(), name="gym-members"),
+    path("gym/trainers/", GymTrainerView.as_view(), name="gym-trainers"),
 ]

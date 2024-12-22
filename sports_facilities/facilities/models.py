@@ -41,6 +41,7 @@ class Gym(models.Model):
 class GymPhoto(models.Model):
     gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="photos")
     photo = models.ImageField(upload_to="gym_photos/")
+    video = models.FileField(upload_to="gym_videos/", blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -48,7 +49,7 @@ class GymPhoto(models.Model):
 
 
 class GymTrainer(models.Model):
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         related_name="trainer_profile",
@@ -61,26 +62,9 @@ class GymTrainer(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - Trainer at {self.gym.name}"
-
-
-class GymMember(models.Model):
-    user = models.OneToOneField(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name="member_profile",
-        limit_choices_to={"role": "member"},
-    )
-    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="gym_members")
-    subscription_plan = models.CharField(max_length=50)
-    subscription_start_date = models.DateField()
-    subscription_end_date = models.DateField()
-    subscription_type = models.CharField(
-        max_length=50, choices=[("monthly", "Monthly"), ("yearly", "Yearly")]
-    )
-    goals = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.user.username} - Member at {self.gym.name}"
+    
+    class Meta:
+        unique_together = ("user", "gym")
 
 
 class GymFeature(models.Model):
@@ -102,6 +86,29 @@ class GymSubscriptionPlan(models.Model):
 
     def __str__(self):
         return f"{self.plan_name} - {self.gym.name}"
+
+class GymMember(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="member_profile",
+        limit_choices_to={"role": "member"},
+    )
+    gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="gym_members")
+    subscription_plan = models.CharField(max_length=50)
+    subscription_plan_new = models.ForeignKey(GymSubscriptionPlan, on_delete=models.CASCADE, related_name="gym_members", default=1)
+    subscription_start_date = models.DateField()
+    subscription_end_date = models.DateField()
+    subscription_type = models.CharField(
+        max_length=50, choices=[("monthly", "Monthly"), ("yearly", "Yearly")]
+    )
+    goals = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - Member at {self.gym.name}"
+    
+    class Meta:
+        unique_together = ("user", "gym")
 
 
 class GymRatingReview(models.Model):

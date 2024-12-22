@@ -12,9 +12,10 @@ from facilities.models import (
     GymSubscriptionPlan,
     GymFeature,
     GymRatingReview,
+    GymMember,
+    GymTrainer,
 )
-from auth_app.models import CustomUser
-from auth_app.serializers import UserSerializer
+from auth_app.serializers import  MemberSerializer, TrainerSerializer
 from facilities.serializers import (
     GymSerializer,
     GymPhotoSerializer,
@@ -22,6 +23,7 @@ from facilities.serializers import (
     GymFeatureSerializer,
     GymRatingReviewSerializer,
     GymSubscriptionPlanSerializer,
+    
 )
 
 
@@ -252,6 +254,87 @@ class GymFeatureView(APIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GymMemberView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MemberSerializer
+
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "gym_id",
+                type=int,
+                description="Id of gym for member retrieval",
+            )
+        ]
+    )
+    def get(self, request):
+        """
+        Retrieve all members of a gym.
+        """
+        gym_id = request.query_params.get("gym_id")
+        if not gym_id:
+            return Response(
+                {"error": "Gym ID must be provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        gym_members = Gym.objects.filter(id=gym_id).values_list("gym_members", flat=True)
+        member = GymMember.objects.filter(id__in=gym_members)
+        serializer = self.serializer_class(member, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        """
+        Add a new gym member to a specific gym.
+        """
+        data = request.data
+        serializer = self.serializer_class(data=data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GymTrainerView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TrainerSerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "gym_id",
+                type=int,
+                description="Id of gym for trainer retrieval",
+            )
+        ]
+    )
+    def get(self, request):
+        """
+        Retrieve all trainers of a gym.
+        """
+        gym_id = request.query_params.get("gym_id")
+        if not gym_id:
+            return Response(
+                {"error": "Gym ID must be provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        gym_trainers = Gym.objects.filter(id=gym_id).values_list("trainers", flat=True)
+        trainer = GymTrainer.objects.filter(id__in=gym_trainers)
+        serializer = self.serializer_class(trainer, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        """
+        Add a new gym trainer to a specific gym.
+        """
+        data = request.data
+        serializer = self.serializer_class(data=data)
+
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

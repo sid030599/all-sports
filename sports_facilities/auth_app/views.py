@@ -8,19 +8,47 @@ from .serializers import UserSerializer
 from rest_framework.exceptions import NotFound
 
 
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from auth_app.openApi.utils import AuthOpenApiRequest
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     """
     Custom view for obtaining JWT tokens.
     Extends the default behavior of TokenObtainPairView.
     """
-    pass
+
+    @extend_schema(
+        methods=["POST"],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": AuthOpenApiRequest.Token.value,
+            },
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
 class CustomTokenRefreshView(TokenRefreshView):
     """
     Custom view for refreshing JWT tokens.
     Extends the default behavior of TokenRefreshView.
     """
-    pass
+
+    @extend_schema(
+        methods=["POST"],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": AuthOpenApiRequest.Token.value,
+            },
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
 
 
 class UserListAPIView(APIView):
