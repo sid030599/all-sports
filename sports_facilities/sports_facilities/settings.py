@@ -80,17 +80,28 @@ WSGI_APPLICATION = 'sports_facilities.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',  # PostgreSQL database engine
+#         'NAME': 'database-1',  # The database name you specified in docker-compose.yml
+#         'USER': 'postgres',  # The user you specified in docker-compose.yml
+#         'PASSWORD': '6mXthn1ep01GOZ1xOiUI',  # The password you specified in docker-compose.yml
+#         'HOST': 'database-1.c5wcoy68gtxh.eu-north-1.rds.amazonaws.com',  # This should match the name of the service in docker-compose.yml
+#         'PORT': '5432',  # Default PostgreSQL port
+#     }
+# }
+
+import os
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',  # PostgreSQL database engine
-        'NAME': 'sports_facilities',  # The database name you specified in docker-compose.yml
-        'USER': 'sid',  # The user you specified in docker-compose.yml
-        'PASSWORD': '1234',  # The password you specified in docker-compose.yml
-        'HOST': 'db',  # This should match the name of the service in docker-compose.yml
-        'PORT': '5432',  # Default PostgreSQL port
+        'ENGINE': 'django.db.backends.postgresql', 
+        'NAME': os.getenv('DATABASE_NAME', 'all-sports'),
+        'USER': os.getenv('DATABASE_USER', 'postgres'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'Sid030599'),
+        'HOST': os.getenv('DATABASE_HOST', 'all-sports.c5wcoy68gtxh.eu-north-1.rds.amazonaws.com'),
+        'PORT': os.getenv('DATABASE_PORT', '5432'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

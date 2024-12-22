@@ -26,6 +26,7 @@ class GymListCreateView(APIView):
         request.data["owner"] = (
             request.user.id
         )
+        # request.data["owner"] = 1
         serializer = GymSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
