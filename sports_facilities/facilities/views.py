@@ -27,7 +27,7 @@ from facilities.serializers import (
 )
 
 
-class GymListCreateView(APIView):
+class GymListView(APIView):
     """
     Gym create view
     """
@@ -40,16 +40,6 @@ class GymListCreateView(APIView):
         serializer = GymSerializer(gyms, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
-        request.data["owner"] = (
-            request.user.id
-        )
-        serializer = GymSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class GymDetailView(APIView):
     """
@@ -59,13 +49,42 @@ class GymDetailView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = GymDetailSerializer
 
-    def get(self, request, pk):
-        gym = get_object_or_404(Gym, pk=pk)
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "gym_id",
+                type=float,
+                description="id for fetching the gym details",
+            ),
+        ]
+    )
+    def get(self, request):
+        gym_id = request.query_params.get("gym_id")
+        gym = get_object_or_404(Gym, pk=gym_id)
         serializer = self.serializer_class(gym)
         return Response(serializer.data)
+    
 
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "gym_id",
+                type=float,
+                description="id for updating the gym details",
+            ),
+        ]
+    )
     def put(self, request, pk):
-        gym = get_object_or_404(Gym, pk=pk)
+        gym_id = request.query_params.get("gym_id")
+        gym = get_object_or_404(Gym, pk=gym_id)
         serializer = self.serializer_class(gym, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()

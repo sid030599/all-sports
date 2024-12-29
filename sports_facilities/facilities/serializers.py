@@ -41,10 +41,9 @@ class GymDetailSerializer(GymSerializer):
             "address",
             "photos",
             "owner",
-            "average_rating",
-            "review_count",
+            "average_rating", "review_count",
         ]
-
+        read_only_fields = ["average_rating", "review_count",]
 
 class GymRatingReviewSerializer(serializers.ModelSerializer):
     class Meta:

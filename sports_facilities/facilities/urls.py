@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    GymListCreateView,
+    GymListView,
     GymDetailView,
     GymPhotoUploadView,
     GymsWithinRadiusView,
@@ -12,8 +12,8 @@ from .views import (
 )
 
 urlpatterns = [
-    path("gyms/", GymListCreateView.as_view(), name="gym-list-create"),
-    path("gyms/<int:pk>/", GymDetailView.as_view(), name="gym-detail"),
+    path("gyms/", GymListView.as_view(), name="gym-list-create"),
+    path("gym/details", GymDetailView.as_view(), name="gym-detail"),
     path(
         "gyms-within-radius/", GymsWithinRadiusView.as_view(), name="gyms-within-radius"
     ),
