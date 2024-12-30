@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import CustomUser
 from .serializers import UserSerializer
 from rest_framework.exceptions import NotFound
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -55,8 +56,21 @@ class UserListAPIView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "role",
+                type=str,
+                description="Filter users by role",
+            ),
+        ]
+    )
     def get(self, request):
-        users = CustomUser.objects.all()
+        role = request.query_params.get("role")
+        if role:
+            users = CustomUser.objects.filter(role=role)
+        else:
+            users = CustomUser.objects.all()
         serializer = self.serializer_class(users, many=True)
         return Response(serializer.data)
 

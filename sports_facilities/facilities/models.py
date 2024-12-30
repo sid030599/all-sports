@@ -3,6 +3,13 @@ from auth_app.models import CustomUser
 
 
 class Gym(models.Model):
+
+    STANDARD_CHOICES = [
+        ("basid", "basic"),
+        ("standard", "standard"),
+        ("premium", "premium"),
+    ]
+
     owner = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
@@ -16,12 +23,28 @@ class Gym(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     contact_number = models.CharField(max_length=20, blank=True, null=True)
-    price_range = models.CharField(max_length=50, blank=True, null=True)
+    standard = models.CharField(choices=STANDARD_CHOICES, blank=True, null=True)
     equipment = models.JSONField(blank=True, null=True)
     logo = models.ImageField(upload_to="gym_logos/", blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    website_url = models.URLField(blank=True, null=True)
     average_rating = models.FloatField(default=0.0)
     review_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_created",
+        null=True,
+        blank=True,
+    )
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    updated_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_updated",
+        null=True,
+        blank=True,
+    )
 
     def update_rating(self):
         """
@@ -30,7 +53,7 @@ class Gym(models.Model):
         ratings = self.ratings_reviews.aggregate(
             avg=models.Avg("rating"), count=models.Count("rating")
         )
-        self.average_rating = round(ratings["avg"],2) or 0.0
+        self.average_rating = round(ratings["avg"], 2) or 0.0
         self.review_count = ratings["count"] or 0
         self.save()
 
@@ -41,8 +64,24 @@ class Gym(models.Model):
 class GymPhoto(models.Model):
     gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="photos")
     photo = models.ImageField(upload_to="gym_photos/")
+    category = models.CharField(max_length=50, blank=True, null=True)
     video = models.FileField(upload_to="gym_videos/", blank=True, null=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_photos_created",
+        null=True,
+        blank=True,
+    )
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    updated_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_photos_updated",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return f"Photo of {self.gym.name}"
@@ -59,10 +98,26 @@ class GymTrainer(models.Model):
     specialization = models.CharField(max_length=255, null=True, blank=True)
     certification = models.TextField(null=True, blank=True)
     years_of_experience = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_trainer_created",
+        null=True,
+        blank=True,
+    )
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    updated_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_trainer_updated",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return f"{self.user.username} - Trainer at {self.gym.name}"
-    
+
     class Meta:
         unique_together = ("user", "gym")
 
@@ -70,6 +125,24 @@ class GymTrainer(models.Model):
 class GymFeature(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
+    image1 = models.ImageField(upload_to="gym_features/", blank=True, null=True)
+    image2 = models.ImageField(upload_to="gym_features/", blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_features_created",
+        null=True,
+        blank=True,
+    )
+    updated_at = models.DateTimeField(null=True, blank=True)
+    updated_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_features_updated",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return self.name
@@ -83,9 +156,26 @@ class GymSubscriptionPlan(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     features = models.ManyToManyField(GymFeature)
     offers = models.CharField(max_length=128, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_subscription_plans_created",
+        null=True,
+        blank=True,
+    )
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    updated_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_subscription_plans_updated",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return f"{self.plan_name} - {self.gym.name}"
+
 
 class GymMember(models.Model):
     user = models.ForeignKey(
@@ -96,17 +186,38 @@ class GymMember(models.Model):
     )
     gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="gym_members")
     subscription_plan = models.CharField(max_length=50)
-    subscription_plan_new = models.ForeignKey(GymSubscriptionPlan, on_delete=models.CASCADE, related_name="gym_members", default=1)
+    subscription_plan_new = models.ForeignKey(
+        GymSubscriptionPlan,
+        on_delete=models.CASCADE,
+        related_name="gym_members",
+        default=1,
+    )
     subscription_start_date = models.DateField()
     subscription_end_date = models.DateField()
     subscription_type = models.CharField(
         max_length=50, choices=[("monthly", "Monthly"), ("yearly", "Yearly")]
     )
     goals = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_member_created",
+        null=True,
+        blank=True,
+    )
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    updated_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_member_updated",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return f"{self.user.username} - Member at {self.gym.name}"
-    
+
     class Meta:
         unique_together = ("user", "gym")
 
@@ -125,15 +236,29 @@ class GymRatingReview(models.Model):
         choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)]
     )
     review = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_reviews_created",
+        null=True,
+        blank=True,
+    )
+    updated_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="gyms_reviews_updated",
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         unique_together = ("gym", "user")
 
     def __str__(self):
         return f"{self.user.username} - {self.gym.name} ({self.rating} stars)"
-    
+
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # Save the review first
-        self.gym.update_rating() 
+        super().save(*args, **kwargs)
+        self.gym.update_rating()

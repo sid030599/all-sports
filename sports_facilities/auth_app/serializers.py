@@ -50,6 +50,11 @@ class MemberSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Subscription end date must be after start date.")
         return data
     
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['created_by'] = request.user
+        return super().create(validated_data)
+    
 class TrainerSerializer(serializers.ModelSerializer):
     user_details = UserSerializer(source="user", read_only=True)
     user = serializers.PrimaryKeyRelatedField(
@@ -67,3 +72,8 @@ class TrainerSerializer(serializers.ModelSerializer):
             "certification",
             "years_of_experience",
         ]
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['created_by'] = request.user
+        return super().create(validated_data)

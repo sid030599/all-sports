@@ -66,7 +66,7 @@ class GymDetailView(APIView):
     
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -85,7 +85,7 @@ class GymDetailView(APIView):
     def put(self, request, pk):
         gym_id = request.query_params.get("gym_id")
         gym = get_object_or_404(Gym, pk=gym_id)
-        serializer = self.serializer_class(gym, data=request.data, partial=True)
+        serializer = self.serializer_class(gym, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -116,7 +116,7 @@ class GymPhotoUploadView(APIView):
             )
 
         gym_photo = GymPhoto.objects.create(gym=gym, photo=photo)
-        serializer = GymPhotoSerializer(gym_photo)
+        serializer = self.serializer_class(gym_photo, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -201,7 +201,7 @@ class GymSubscriptionPlanView(APIView):
 
     def post(self, request):
         data = request.data
-        serializer = self.serializer_class(data=data)
+        serializer = self.serializer_class(data=data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -229,7 +229,7 @@ class GymRatingReviewView(APIView):
 
     def post(self, request):
         data = request.data
-        serializer = self.serializer_class(data=data)
+        serializer = self.serializer_class(data=data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -272,7 +272,7 @@ class GymFeatureView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -312,7 +312,7 @@ class GymMemberView(APIView):
         Add a new gym member to a specific gym.
         """
         data = request.data
-        serializer = self.serializer_class(data=data)
+        serializer = self.serializer_class(data=data, context={'request': request})
 
         if serializer.is_valid():
             serializer.save()
@@ -352,7 +352,7 @@ class GymTrainerView(APIView):
         Add a new gym trainer to a specific gym.
         """
         data = request.data
-        serializer = self.serializer_class(data=data)
+        serializer = self.serializer_class(data=data, context={'request': request})
 
         if serializer.is_valid():
             serializer.save()
