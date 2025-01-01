@@ -18,6 +18,7 @@ from facilities.models import (
 from auth_app.serializers import  MemberSerializer, TrainerSerializer
 from facilities.serializers import (
     GymSerializer,
+    GymIdValidationSerializer,
     GymPhotoSerializer,
     GymDetailSerializer,
     GymFeatureSerializer,
@@ -62,6 +63,7 @@ class GymDetailView(APIView):
 
     permission_classes = [IsAuthenticated]
     serializer_class = GymDetailSerializer
+    validation_serializer = GymIdValidationSerializer
 
     @extend_schema(
         parameters=[
@@ -73,8 +75,10 @@ class GymDetailView(APIView):
         ]
     )
     def get(self, request):
-        gym_id = request.query_params.get("gym_id")
-        gym = get_object_or_404(Gym, pk=gym_id)
+        validation_serializer = self.validation_serializer(data=request.query_params)
+        validation_serializer.is_valid(raise_exception=True)
+        gym_id = validation_serializer.validated_data.get("gym_id")
+        gym = Gym.objects.filter(id=gym_id).first()
         serializer = self.serializer_class(gym)
         return Response(serializer.data)
     
@@ -112,25 +116,48 @@ class GymDetailView(APIView):
 
 
 class GymPhotoUploadView(APIView):
+    permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
+    validation_serializer = GymIdValidationSerializer
     serializer_class = GymPhotoSerializer
 
-    def post(self, request, gym_id):
-        try:
-            gym = Gym.objects.get(id=gym_id)
-        except Gym.DoesNotExist:
-            return Response(
-                {"error": "Gym not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "gym_id",
+                type=float,
+                description="id for fetching the gym details",
+            ),
+        ]
+    )
+    def get(self, request):
+        validation_serializer = self.validation_serializer(data=request.query_params)
+        validation_serializer.is_valid(raise_exception=True)
+        gym_id = validation_serializer.validated_data.get("gym_id")
+        gym_photos = GymPhoto.objects.filter(gym_id=gym_id)
+        serializer = self.serializer_class(gym_photos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-        photo = request.FILES.get("photo")
-        if not photo:
-            return Response(
-                {"error": "No photo provided"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        gym_photo = GymPhoto.objects.create(gym=gym, photo=photo)
-        serializer = self.serializer_class(gym_photo, context={'request': request})
+    @extend_schema(
+        request={
+            'multipart/form-data': {
+                'type': 'object',
+                'properties': {
+                    'gym': {'type': 'integer'},
+                    'photo': {'type': 'string', 'format': 'binary'},
+                    'video': {'type': 'string', 'format': 'binary'},
+                    'description': {'type': 'string'},
+                },
+                'required': ['gym', 'photo'],
+            }
+        },
+        responses=GymPhotoSerializer,
+    )
+    def post(self, request):
+        # Use a single serializer to handle validation and creation
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

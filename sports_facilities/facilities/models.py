@@ -1,11 +1,10 @@
 from django.db import models
 from auth_app.models import CustomUser
-
-
+    
 class Gym(models.Model):
 
     STANDARD_CHOICES = [
-        ("basid", "basic"),
+        ("basic", "basic"),
         ("standard", "standard"),
         ("premium", "premium"),
     ]
@@ -63,8 +62,8 @@ class Gym(models.Model):
 
 class GymPhoto(models.Model):
     gym = models.ForeignKey(Gym, on_delete=models.CASCADE, related_name="photos")
-    photo = models.ImageField(upload_to="gym_photos/")
-    category = models.CharField(max_length=50, blank=True, null=True)
+    photo = models.ImageField(upload_to="gym_photos/", blank=True, null=True)
+    description = models.CharField(max_length=50, blank=True, null=True)
     video = models.FileField(upload_to="gym_videos/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     created_by = models.ForeignKey(

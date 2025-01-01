@@ -10,3 +10,4 @@ djangorestframework
 drf-spectacular
 Pillow
 django_filter
+jsonschema
