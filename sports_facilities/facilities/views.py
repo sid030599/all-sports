@@ -25,6 +25,7 @@ from facilities.serializers import (
     GymSubscriptionPlanSerializer,
     
 )
+from facilities.filters import GymFilter
 
 
 class GymListView(APIView):
@@ -32,12 +33,25 @@ class GymListView(APIView):
     Gym create view
     """
 
-    permission_classes = [IsAuthenticated]
     serializer_class = GymSerializer
+    filter_class = GymFilter
+    queryset = Gym.objects.all()
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "name",
+                type=str,
+                description="name of the gym",
+            ),
+        ]
+    )
     def get(self, request):
-        gyms = Gym.objects.all()
-        serializer = GymSerializer(gyms, many=True)
+        
+        gym_queryset = self.filter_class(
+            self.request.GET, queryset=self.queryset
+        ).qs
+        serializer = self.serializer_class(gym_queryset, many=True)
         return Response(serializer.data)
 
 
