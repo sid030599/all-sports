@@ -53,7 +53,7 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 
 class UserListAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
 
     @extend_schema(

@@ -4,13 +4,18 @@ from facilities.models import GymMember, GymTrainer
 
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = CustomUser
-        fields = ["id", "username", "email", "role", "contact_number"]
+        fields = ["id", "username", "email", "role", "contact_number", "password"]
 
     def create(self, validated_data):
-        return CustomUser.objects.create(**validated_data)
+        password = validated_data.pop('password')  # Extract password
+        user = CustomUser.objects.create(**validated_data)
+        user.set_password(password)  # Hash the password and set it
+        user.save()
+        return user
 
     def update(self, instance, validated_data):
         # Update user details without handling facilities

@@ -4,7 +4,9 @@ from facilities.models import Gym
 
 class GymFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(lookup_expr="icontains")
-    address = django_filters.CharFilter(lookup_expr="icontains")
+    address = django_filters.CharFilter(
+        field_name="address__city", lookup_expr="icontains"
+    )
     owner = django_filters.CharFilter(
         field_name="owner__username", lookup_expr="icontains"
     )

@@ -45,6 +45,11 @@ class GymListView(APIView):
                 type=str,
                 description="name of the gym",
             ),
+            OpenApiParameter(
+                "address",
+                type=str,
+                description="city of the gym",
+            ),
         ]
     )
     def get(self, request):
@@ -82,7 +87,7 @@ class GymDetailView(APIView):
         serializer = self.serializer_class(gym)
         return Response(serializer.data)
     
-
+    
     def post(self, request):
         serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid():
